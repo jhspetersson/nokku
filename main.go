@@ -16,14 +16,15 @@ func main() {
 	if len(args) < 3 {
 		fmt.Println("Port-knocking client.")
 		fmt.Println("https://github.com/jhspetersson/nokku")
-		fmt.Println("Usage: nokku HOSTNAME[:PORT] [HOSTNAME2:]PORT2 [[HOSTNAME3:]PORT3 [[HOSTNAME4:]PORT4 [...]]]")
+		fmt.Println("Usage: nokku HOSTNAME[:PORT] [PROTO] [HOSTNAME2:]PORT2 [[HOSTNAME3:]PORT3 [[HOSTNAME4:]PORT4 [...]]]")
 		os.Exit(1)
 	}
 
 	var host, port string
+	var proto = "tcp"
 
 	for _, arg := range args[1:] {
-		parsedHost, parsedPort, err := parseArg(arg)
+		parsedHost, parsedPort, parsedProto, err := parseArg(arg)
 
 		if err != nil {
 			log.Fatalf("Error: %s", err)
@@ -41,12 +42,16 @@ func main() {
 			port = parsedPort
 		}
 
+		if parsedProto != "" {
+			proto = parsedProto
+		}
+
 		if host != "" && port != "" {
 			addr := host + ":" + port
 
-			fmt.Println("Knocking to " + addr)
+			fmt.Println("Knocking to " + addr + " (" + proto + ")")
 
-			conn, err := net.Dial("tcp", addr)
+			conn, err := net.Dial(proto, addr)
 			if err == nil {
 				_ = conn.Close()
 			}
@@ -56,8 +61,12 @@ func main() {
 	fmt.Println("Sequence completed!")
 }
 
-func parseArg(arg string) (host, port string, err error) {
-	if strings.Contains(arg, ":") {
+func parseArg(arg string) (host, port, proto string, err error) {
+	if strings.ToLower(arg) == "tcp" {
+		proto = "tcp"
+	} else if strings.ToLower(arg) == "udp" {
+		proto = "udp"
+	} else if strings.Contains(arg, ":") {
 		parts := strings.Split(arg, ":")
 		host = parts[0]
 		port = parts[1]

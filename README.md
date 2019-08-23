@@ -3,10 +3,12 @@ Port-knocking client. Supports multiple hosts knocking.
 
 ### Usage
 
-    nokku HOSTNAME[:PORT] [HOSTNAME2:]PORT2 [[HOSTNAME3:]PORT3 [[HOSTNAME4:]PORT4 [...]]]
+    nokku HOSTNAME[:PORT] [PROTO] [HOSTNAME2:]PORT2 [[HOSTNAME3:]PORT3 [[HOSTNAME4:]PORT4 [...]]]
     
 Supply a hostname first, optionally with a port in the form of `host:port`. 
 Then goes any number of ports. Supply another hostname option to switch the target address.
+
+Insert `tcp` (default) or `udp` command to switch to the corresponding protocol.
   
 ### Examples
 
@@ -29,3 +31,11 @@ Multiple hosts, same port:
 
     nokku 192.168.251.1 44555 192.168.251.2 192.168.251.3
     nokku 192.168.251.1:44555 192.168.251.2 192.168.251.3
+    
+Switch to UDP and back to TCP:
+
+    nokku 192.168.251.34 10100 udp 10200 tcp 10300
+    
+All UDP:
+
+    nokku udp 192.168.251.1 20100 20123 192.168.251.2 14500 14600
