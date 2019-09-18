@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -16,14 +17,21 @@ func main() {
 	if len(args) < 3 {
 		fmt.Println("Port-knocking client.")
 		fmt.Println("https://github.com/jhspetersson/nokku")
-		fmt.Println("Usage: nokku HOSTNAME[:PORT] [PROTO] [HOSTNAME2:]PORT2 [[HOSTNAME3:]PORT3 [[HOSTNAME4:]PORT4 [...]]]")
+		fmt.Println("Usage: nokku HOSTNAME[:PORT] [PROTO] [pause] [HOSTNAME2:]PORT2 [pause] [[HOSTNAME3:]PORT3 [[HOSTNAME4:]PORT4 [...]]]")
 		os.Exit(1)
 	}
 
 	var host, port string
 	var proto = "tcp"
+	var pause = 1
 
 	for _, arg := range args[1:] {
+		if isPause(arg) {
+			fmt.Println(".....")
+			time.Sleep(time.Duration(pause) * time.Second)
+			continue
+		}
+
 		parsedHost, parsedPort, parsedProto, err := parseArg(arg)
 
 		if err != nil {
@@ -79,4 +87,8 @@ func parseArg(arg string) (host, port, proto string, err error) {
 	}
 
 	return
+}
+
+func isPause(arg string) bool {
+	return strings.ToLower(arg) == "pause"
 }
