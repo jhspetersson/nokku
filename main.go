@@ -24,6 +24,7 @@ func main() {
 	var host, port string
 	var proto = "tcp"
 	var pause = 1
+	var delay = 1
 
 	for _, arg := range args[1:] {
 		if isPause(arg) {
@@ -63,6 +64,8 @@ func main() {
 			if err == nil {
 				_ = conn.Close()
 			}
+
+			time.Sleep(time.Duration(delay) * time.Second)
 		}
 	}
 
