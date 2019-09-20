@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -23,10 +24,35 @@ func main() {
 
 	var host, port string
 	var proto = "tcp"
-	var pause = 1
+
+	// delay between connection tries, 1 second by default
 	var delay = 1
 
-	for _, arg := range args[1:] {
+	// pause duration, 1 second by default
+	var pause = 1
+
+	// starting index to parse command sequence from program arguments
+	var idx = 1
+
+	if ok, paramIndex := locateParam(args, "-d", "--delay"); ok {
+		if parsed, err := strconv.Atoi(args[paramIndex+1]); err != nil {
+			delay = parsed
+			idx += 2
+		} else {
+			log.Fatalf("Error parsing delay: %s", err)
+		}
+	}
+
+	if ok, paramIndex := locateParam(args, "-p", "--pause"); ok {
+		if parsed, err := strconv.Atoi(args[paramIndex+1]); err != nil {
+			pause = parsed
+			idx += 2
+		} else {
+			log.Fatalf("Error parsing pause: %s", err)
+		}
+	}
+
+	for _, arg := range args[idx:] {
 		if isPause(arg) {
 			fmt.Println(".....")
 			time.Sleep(time.Duration(pause) * time.Second)
@@ -70,6 +96,18 @@ func main() {
 	}
 
 	fmt.Println("Sequence completed!")
+}
+
+func locateParam(args []string, params ...string) (ok bool, idx int) {
+	for i, arg := range args {
+		for _, param := range params {
+			if strings.ToLower(param) == strings.ToLower(arg) {
+				return true, i
+			}
+		}
+	}
+
+	return false, 0
 }
 
 func parseArg(arg string) (host, port, proto string, err error) {
